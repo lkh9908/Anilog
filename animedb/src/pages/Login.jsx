@@ -9,7 +9,7 @@ export const Login = (props) => {
         console.log(email, password)
     }
     return (
-        <div className='auth-form-container'>
+        <div className='App auth-form-container'>
             <form className = 'login-form' onSubmit={handleSubmit}>
                 <label htmlFor='email'> Email: </label>
                 <input value = {email} onChange={(e)=>setEmail(e.target.value)} type='email' palceholder='example@email.com' id='email' name='email' />
@@ -22,3 +22,6 @@ export const Login = (props) => {
         </div>
     )
 }
+
+
+
