@@ -1,0 +1,163 @@
+$theme : #87adfa, #C7E9FF, #e49eff;
+
+.app {
+    display: flex;
+    justify-content: center;
+    background-image: linear-gradient(79deg, $theme);
+    .container {
+    width: 1024px;
+
+        .links{
+            text-decoration: none;
+            color: inherit;
+        }
+
+    // Login and register
+        .auth {
+            text-align: center;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media screen and (min-width: 600px) {
+            .auth-box {
+            padding: 1rem;
+            margin: 0.5rem;
+            border: 1px solid white;
+            border-radius: 10px;
+            }
+        }
+
+        .auth, .login-form, .register-form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            text-align: left;
+            font-size: large;
+            font-weight: bold;
+            padding: 0.25rem 0;
+        }
+        
+        input {
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            gap: 20px;
+        }
+        
+        .auth-button {
+            border: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #e49eff;
+            font-weight: bold;
+        }
+        
+        .link-btn {
+            background: none;
+            color: white;
+            text-decoration: underline;
+        }
+    
+    //Navbar
+
+    .nav-link {
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+      
+    .nav-link::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2px;
+        width: 100%;
+        background-color: #6a0767;
+        transform: scaleX(0);
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .nav-link:hover::before {
+        transform: scaleX(1);   
+    }
+    
+    
+    h6 {
+        font-size: 16px;  
+        font-weight: 300;
+        color: white;
+    }
+
+   
+
+    //Footer
+    footer {
+        margin-top: 100px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content:center;
+        img {
+            height: 5rem;
+        }
+    }
+
+    // home page
+    .home {
+        .top-anime{
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+
+            .anime{
+                .content{
+                    @media screen and (min-width: 600px) {
+                        display: flex;
+                    }
+                    
+                    position: relative;
+                    z-index: 0;
+                    // &:nth-child(2n+1){
+                    //     flex-direction: row-reverse;
+                    // }
+                    @media screen and (min-width: 600px) {
+                        .title{
+                            flex: 1
+                        }
+                        .info {
+                            flex: 1;
+                            gap: 1rem;
+                            display: flex;
+                        }
+                    }
+                }
+            }
+        }
+
+        .search-bar {
+            margin: 50px;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+  }
+}
+
+
+
+.logo {
+    width: 10rem;
+}
+

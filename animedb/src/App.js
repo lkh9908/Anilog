@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import {createBrowserRouter, RouterProvider, Route, Outlet} from 'react-router-dom'
 
-import './App.scss';
+import './style.scss';
 import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 
@@ -71,9 +71,9 @@ function App() {
       
     // </div>
     <div className="app">
-    
-      <RouterProvider router={router} />
-
+      <div className="container">
+        <RouterProvider router={router} />
+      </div>
     </div>
 
   );

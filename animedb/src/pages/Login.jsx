@@ -1,4 +1,6 @@
 import React, {useState} from 'react'
+import { Link } from 'react-router-dom'
+
 
 export const Login = (props) => {
     const [email, setEmail] = useState('')
@@ -9,16 +11,18 @@ export const Login = (props) => {
         console.log(email, password)
     }
     return (
-        <div className='App auth-form-container'>
-            <form className = 'login-form' onSubmit={handleSubmit}>
-                <label htmlFor='email'> Email: </label>
-                <input value = {email} onChange={(e)=>setEmail(e.target.value)} type='email' palceholder='example@email.com' id='email' name='email' />
+        <div className='auth'>
+            <div className='auth-box'>
+                <form className = 'login-form' onSubmit={handleSubmit}>
+                    <label htmlFor='email'> Email: </label>
+                    <input value = {email} onChange={(e)=>setEmail(e.target.value)} type='email' palceholder='example@email.com' id='email' name='email' />
 
-                <label htmlFor='password'> Password: </label>
-                <input value = {password} onChange={(e)=>setPassword(e.target.value)} type='password' palceholder='********' id='password' name='password' />
-                <button>Log In</button>
-            </form>
-            <button className = 'link-btn' onClick={()=>props.onFormSwitch('register')}>Don't have an account? Register.</button>
+                    <label htmlFor='password'> Password: </label>
+                    <input value = {password} onChange={(e)=>setPassword(e.target.value)} type='password' palceholder='********' id='password' name='password' />
+                    <button className='auth-button'>Log In</button>
+                </form>
+                <button className = 'link-btn'><Link to='/register'>Don't have an account? Register.</Link></button>
+            </div>
         </div>
     )
 }
