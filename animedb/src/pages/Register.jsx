@@ -1,17 +1,32 @@
 import React, {useState} from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from "axios"
 
 export const Register = (props) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [userName, setUserName] = useState('')
+    const [username, setUsername] = useState('')
     const [gender, setGender] = useState('')
     const [location, setLocation] = useState('')
     const [birthdate, setBirthdate] = useState('')
+    
+    const [err, setErr] = useState(null)
+
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
+        // database has birth_date, so the format, mind the names
+        const inputs = {"email" : email, "password" : password, 'username' : username, 'gender' : gender, "location" : location, "birth_date" : birthdate}
+        
         e.preventDefault()
-        console.log(email, password)
+        // console.log(inputs)
+        try{
+            const res = await axios.post("/auth/register", inputs)
+            console.log(res)
+            navigate('/login')
+        } catch(err) {
+            setErr(err.response.data)
+        }
     }
     return (
         <div className='auth'>
@@ -20,8 +35,8 @@ export const Register = (props) => {
                     <label htmlFor='email'> Email: </label>
                     <input value = {email} onChange={(e)=>setEmail(e.target.value)} type='email' palceholder='example@email.com' id='email' name='email' />
 
-                    <label htmlFor='userName'> User Name: </label>
-                    <input value = {userName} onChange={(e)=>setUserName(e.target.value)} type='userName' palceholder='xxxxx' id='userName' name='userName' />
+                    <label htmlFor='username'> User Name: </label>
+                    <input value = {username} onChange={(e)=>setUsername(e.target.value)} type='username' palceholder='xxxxx' id='username' name='username' />
 
                     <label htmlFor='password'> Password: </label>
                     <input value = {password} onChange={(e)=>setPassword(e.target.value)} type='password' palceholder='********' id='password' name='password' />
@@ -35,6 +50,7 @@ export const Register = (props) => {
                     <label htmlFor='birthdate'> Birthdate: </label>
                     <input value = {birthdate} onChange={(e)=>setBirthdate(e.target.value)} type='birthdate' palceholder='********' id='birthdate' name='birthdate' />
                     <button className='auth-button'>Register</button>
+                    {err && <p style={{color: 'red'}}>{err}</p>}
                 </form>
                 <button className = 'link-btn'><Link to='/login'>Already have an account? Login.</Link></button>
             </div>

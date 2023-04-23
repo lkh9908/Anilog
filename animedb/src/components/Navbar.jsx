@@ -100,19 +100,26 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import { AuthContext } from "../context/authContext";
 
 
 const pages = ['My List', 'Profile', 'Logout'];
 
 export const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
-
+  const {currentUser, logout } = React.useContext(AuthContext)
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
 
 
-  const handleCloseNavMenu = () => {
+  const handleCloseNavMenu = (e) => {
+    const target = e.target
+    // console.log(target.innerText)
+    if (target.innerText.toUpperCase() === "LOGOUT") {
+      console.log('logging out')
+      logout()
+    }
     setAnchorElNav(null);
   };
 
@@ -178,9 +185,15 @@ export const Navbar = () => {
                     </Link>                
                 </MenuItem>
                 <MenuItem key="logout" onClick={handleCloseNavMenu}>
-                    <Link to='/logout' className = "nav-link">
-                      Logout
-                    </Link>                
+                    {currentUser ? 
+                      <Link to='/' className = "nav-link">
+                        Logout
+                      </Link> 
+                      :
+                      <Link to='/login' className = "nav-link">
+                        Login
+                    </Link> 
+                    }               
                 </MenuItem>
             </Menu>
           </Box>
@@ -221,15 +234,28 @@ export const Navbar = () => {
                       <h6>Profile</h6>
                 </Link>   
               </Button>
-              <Button
+              {currentUser ? 
+                <Button
                 key="logout"
                 onClick={handleCloseNavMenu}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                <Link to='/logout' className = "nav-link">
+                <Link to='/' className = "nav-link">
                       <h6>Logout</h6>
                 </Link>   
               </Button>
+                      :
+                <Button
+                key="logout"
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
+                <Link to='/login' className = "nav-link">
+                      <h6>Login</h6>
+                </Link>   
+              </Button>
+                    }   
+              
 
           </Box>
         </Toolbar>

@@ -6,12 +6,14 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from '@mui/material/Autocomplete';
 import Stack from '@mui/material/Stack';
 
+// top 10 anime saved on a different table
 
 
 export const Home = () => {
   return (
     <div className='home'>
       <div className='top-anime'>
+        
         <h1>Top 10 anime</h1>
         {anime.map(anime=>(
           <div className='anime' key={anime.id}>
