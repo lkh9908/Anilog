@@ -69,7 +69,7 @@ export const Home = () => {
               {top10.map((anime) => (
                 <StyledTableRow key={anime.MAL_ID}>
                   <StyledTableCell component="th" scope="row">
-                    {anime.Name}
+                  <Link to={`/anime/${anime.MAL_ID}`}>{anime.Name}</Link>
                   </StyledTableCell>
                   <StyledTableCell align="center">
                     {anime.Japanese_name}

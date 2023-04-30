@@ -3,7 +3,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import IconButton from "@mui/material/IconButton";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import {
   Table,
   TableBody,
@@ -13,14 +13,18 @@ import {
   TableRow,
   Paper,
   Button,
+  Typography,
+  Slider,
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
+import { Link } from "react-router-dom";
 
 export const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState([]);
   const [searchData, setSearchData] = useState([]);
   const [cls, setCls] = useState("green");
   async function search() {
+    if (searchQuery == "") return;
     try {
       const res = await axios.get(`/anime/${searchQuery}`);
       console.log(res.data);
@@ -30,15 +34,13 @@ export const SearchBar = () => {
     }
   }
 
-
-  async function addClicked(e, MAL_ID) {
-    console.log(MAL_ID);
-  
+  async function addClicked(e, MAL_ID, episodes) {
+    // console.log(MAL_ID, episodes);
+    e.target.className = "red";
     // Prompt for watching status and watched episodes
     const { value: formValues } = await Swal.fire({
-        title: "Add to Anime List",
-        html:
-        `<label for="status-select">Watching Status</label>
+      title: "Add to Anime List",
+      html: `<label for="status-select">Watching Status</label>
         <select id="status-select" class="swal2-select">
           <option value="1">Currently Watching</option>
           <option value="2">Completed</option>
@@ -46,80 +48,94 @@ export const SearchBar = () => {
           <option value="4">Dropped</option>
           <option value="5">Plan to Watch</option>
         </select>
-        <label for="episodes-input">Watched Episodes</label>
-        <input id="episodes-input" type="number" min="0" max="99999" class="swal2-input">
+        <label for="episodes-input">Watched Episodes (0 - ${episodes}): </label>
+        <input id="episodes-input" type="number" min="0" max=${episodes} class="swal2-input">
         <br/>
-        <label for="rating-input">Rate the Anime</label>
+        <label for="rating-input">Rate the Anime (0 - 10): </label>
         <input id="rating-input" type="number" min="0" max="10" class="swal2-input">`,
-        
-        focusConfirm: false,
-        preConfirm: () => {
-          return [
-            document.getElementById("status-select").value,
-            document.getElementById("rating-input").value,
-            document.getElementById("episodes-input").value
-          ];
-        }
-      });
-  
+
+      focusConfirm: false,
+      preConfirm: () => {
+        return [
+          document.getElementById("status-select").value,
+          document.getElementById("rating-input").value,
+          document.getElementById("episodes-input").value,
+        ];
+      },
+    });
+
     // Get values from the prompt
-    const watchedEpisodes = document.getElementById("episodes-input").value ? document.getElementById("episodes-input").value : 0;
+    const watchedEpisodes = document.getElementById("episodes-input").value
+      ? document.getElementById("episodes-input").value
+      : 0;
     const watchingStatus = document.getElementById("status-select").value;
     const rating = document.getElementById("rating-input").value;
 
-    console.log(rating, watchedEpisodes, watchingStatus)
-  
+    // console.log(rating, watchedEpisodes, watchingStatus)
+
     // Add code to push data to backend
     try {
-        console.log(await axios.post(`/watchList/${MAL_ID}/${rating}/${watchingStatus}/${watchedEpisodes}`));
-      } catch (err) {
-        console.log(err);
-      }
+      console.log(
+        await axios.post(
+          `/watchList/${MAL_ID}/${rating}/${watchingStatus}/${watchedEpisodes}`
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
   }
+
+  // filter
+  const [selectedGenre, setSelectedGenre] = useState(defaultGenres[0]);
+  const [scoreRange, setScoreRange] = useState([0, 100]);
+  const [selectedRating, setSelectedRating] = useState(rating[0]);
+  const [selectedStudio, setSelectedStudio] = useState(studios[0]);
+  const [selectedSource, setSelectedSource] = useState(sources[0]);
+  const [filterResult, setFilterResult] = useState([]);
+  async function handleFilter() {
+    console.log("Selected Genre:", selectedGenre);
+    console.log("Score Range:", scoreRange);
+    console.log("Rating Range:", selectedRating);
+    console.log("Studio Range:", selectedStudio);
+    console.log("Source:", selectedSource);
+    // Perform filtering logic here
+
+    try {
+      const res = await axios.get(`/anime/${selectedGenre}/${scoreRange[0]}/${scoreRange[1]}/${selectedRating}/${selectedStudio}/${selectedSource}`);
+      console.log(res.data);
+      setFilterResult(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
 
   return (
     <form>
-      <TextField
-        id="search-bar"
-        className="text"
-        onInput={(e) => {
-          setSearchQuery(e.target.value);
-        }}
-        label="Enter a anime name"
-        variant="outlined"
-        placeholder="Search..."
-        size="small"
-      />
-      <IconButton aria-label="search" onClick={search}>
-        Search
-      </IconButton>
+            <h1>Search anime</h1>
+      <div
+        style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}
+      >
+        <TextField
+          id="search-bar"
+          style={{ marginRight: "10px", width: "100%" }}
+          onInput={(e) => {
+            setSearchQuery(e.target.value);
+          }}
+          label="Enter an anime name"
+          variant="outlined"
+          placeholder="Search..."
+          size="small"
+        />
+        <IconButton
+          aria-label="search"
+          style={{ padding: "1rem", backgroundColor: "#4CAF50", color: "#fff" }}
+          onClick={search}
+        >
+          Search
+        </IconButton>
+      </div>
 
-      {/* <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Japanese Name</th>
-            <th>Add</th>
-          </tr>
-        </thead>
-        <tbody>
-          {searchData.length > 0 ? (
-            searchData.map((anime) => (
-              <tr key={anime.MAL_ID}>
-                <td>{anime.Name}</td>
-                <td>{anime.Japanese_name}</td>
-                <td>
-                  <button onClick={() => console.log('add')}>Add</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="3">No results found</td>
-            </tr>
-          )}
-        </tbody>
-      </table> */}
       <Divider
         variant="fullWidth"
         color="secondary"
@@ -138,7 +154,7 @@ export const SearchBar = () => {
                 Name
               </TableCell>
               <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
-                Japanese Name
+                Original Name
               </TableCell>
 
               <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
@@ -151,7 +167,7 @@ export const SearchBar = () => {
               searchData.map((anime) => (
                 <TableRow key={anime.MAL_ID}>
                   <TableCell component="th" scope="row" align="center">
-                    {anime.Name}
+                    <Link to={`/anime/${anime.MAL_ID}`}>{anime.Name}</Link>
                   </TableCell>
                   <TableCell align="center">{anime.Japanese_name}</TableCell>
                   <TableCell align="center">
@@ -160,6 +176,7 @@ export const SearchBar = () => {
                         .red {
                         background-color: gray;
                         pointer-events: none;
+                        display: none;
                         }
                         .green {
                         background-color: primary;
@@ -169,7 +186,9 @@ export const SearchBar = () => {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={(e) => addClicked(e, anime.MAL_ID)}
+                      onClick={(e) =>
+                        addClicked(e, anime.MAL_ID, anime.Episode)
+                      }
                       className={cls}
                     >
                       Add
@@ -185,28 +204,496 @@ export const SearchBar = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* <Autocomplete
-        id="size-small-standard"
-        size="small"
-        options={top100Films}
-        getOptionLabel={(option) => option.title}
-        defaultValue={top100Films[13]}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="standard"
-            label="Size small"
-            placeholder="Favorites"
+
+      <div style={{ marginTop: "3rem", marginBottom: "1rem" }}>
+      <h1>Filter anime</h1>
+      <div style={{ marginTop: "1rem" }}>
+      <Typography gutterBottom>Genre:</Typography>
+        <Autocomplete
+          id="genre-filter"
+          options={defaultGenres}
+          value={selectedGenre}
+          onChange={(event, newValue) => {
+            setSelectedGenre(newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select a genre"
+            />
+          )}
+        />
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <Typography gutterBottom>Score Range:</Typography>
+          <Slider
+            value={scoreRange}
+            onChange={(event, newValue) => {
+              setScoreRange(newValue);
+            }}
+            valueLabelDisplay="auto"
+            marks={marks}
+            min={0}
+            max={10}
           />
-        )}
-      /> */}
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+      <Typography gutterBottom>Rating:</Typography>
+        <Autocomplete
+          id="rating-filter"
+          options={rating}
+          value={selectedRating}
+          onChange={(event, newValue) => {
+            setSelectedRating(newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select a rating"
+            />
+          )}
+        />
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+      <Typography gutterBottom>Studio:</Typography>
+        <Autocomplete
+          id="studio-filter"
+          options={studios}
+          value={selectedStudio}
+          onChange={(event, newValue) => {
+            setSelectedStudio(newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select a studio"
+            />
+          )}
+        />
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+      <Typography gutterBottom>Source:</Typography>
+        <Autocomplete
+          id="source-filter"
+          options={sources}
+          value={selectedSource}
+          onChange={(event, newValue) => {
+            setSelectedSource(newValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select a source"
+            />
+          )}
+        />
+        </div>
+
+
+
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleFilter}
+          style={{ marginTop: "1rem" }}
+        >
+          Filter
+        </Button>
+
+        <Divider
+        variant="fullWidth"
+        color="secondary"
+        orientation="horizontal"
+        sx={{ my: 2 }}
+      />
+      <TableContainer component={Paper}>
+        <Table aria-label="Anime table">
+          <TableHead>
+            <TableRow
+              style={{
+                backgroundColor: "#e8d7ff",
+              }}
+            >
+              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                Name
+              </TableCell>
+              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                Original Name
+              </TableCell>
+
+              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                Add
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filterResult.length > 0 ? (
+              filterResult.map((anime) => (
+                <TableRow key={anime.MAL_ID}>
+                  <TableCell component="th" scope="row" align="center">
+                    <Link to={`/anime/${anime.MAL_ID}`}>{anime.Name}</Link>
+                  </TableCell>
+                  <TableCell align="center">{anime.Japanese_name}</TableCell>
+                  <TableCell align="center">
+                    <style>
+                      {`
+                        .red {
+                        background-color: gray;
+                        pointer-events: none;
+                        display: none;
+                        }
+                        .green {
+                        background-color: primary;
+                        }
+                    `}
+                    </style>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={(e) =>
+                        addClicked(e, anime.MAL_ID, anime.Episode)
+                      }
+                      className={cls}
+                    >
+                      Add
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan="3">No results found</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      </div>
     </form>
   );
 };
 
-const top100Films = [
-  { title: "The Shawshank Redemption", year: 1994 },
-  { title: "The Godfather", year: 1972 },
-  { title: "The Godfather: Part II", year: 1974 },
-  { title: "The Dark Knight", year: 2008 },
+const marks = [
+  {
+    value: 0,
+    label: "0",
+  },
+  {
+    value: 10,
+    label: "10",
+  },
 ];
+
+const defaultGenres = [
+  "Action",
+  "Comedy",
+  "Drama",
+  "Game",
+  "Sci-Fi",
+  "Harem",
+  "Adventure",
+  "Slice of Life",
+  "Military",
+  "Space",
+  "Music",
+  "Mecha",
+  "Supernatural",
+  "Historical",
+  "Mystery",
+  "Ecchi",
+  "Fantasy",
+  "Horror",
+  "Dementia",
+  "Psychological",
+  "Sports",
+  "Demons",
+  "Magic",
+  "Kids",
+  "Romance",
+  "Thriller",
+  "Seinen",
+  "School",
+  "Martial Arts",
+  "Super Power",
+  "Cars",
+];
+
+const studios = [
+  "Sunrise",
+  "Madhouse",
+  "J.C.Staff",
+  "Studio Pierrot",
+  "Trans Arts",
+  "Studio Comet",
+  "Gonzo",
+  "Gainax, Tatsunoko Production",
+  "OLM",
+  "Gallop, Studio Deen",
+  "Bee Train",
+  "AIC",
+  "Bones",
+  "Xebec",
+  "Daume",
+  "Nomad",
+  "Kyoto Animation",
+  "Group TAC",
+  "Seven Arcs",
+  "Asread",
+  "Sunrise, Studio Deen",
+  "Sunrise, Nakamura Production",
+  "Hal Film Maker",
+  "Studio Deen",
+  "Nippon Animation",
+  "Production I.G",
+  "Studio Matrix",
+  "feel.",
+  "TNK",
+  "Gainax, J.C.Staff",
+  "Gainax, Shaft",
+  "Studio Fantasia",
+  "Toei Animation",
+  "Production Reed",
+  "Gallop, Studio Comet",
+  "Pastel",
+  "Manglobe",
+  "Arms",
+  "ufotable",
+  "Chaos Project, GANSIS",
+  "Palm Studio",
+  "AIC Spirits",
+  "Shin-Ei Animation",
+  "Imagin, Studio Live",
+  "TMS Entertainment",
+  "A.C.G.T.",
+  "Radix",
+  "Gainax, Madhouse",
+  "Studio Fantasia, Amber Film Works",
+  "E&G Films",
+  "Tokyo Movie Shinsha",
+  "Triangle Staff",
+  "Magic Bus",
+  "Group TAC, Japan Vistec",
+  "AIC ASTA",
+  "G&G Entertainment",
+  "Gonzo, Production I.G",
+  "Plum, Magic Bus",
+  "Artland",
+  "Satelight, Production Reed",
+  "Gallop",
+  "Brain's Base",
+  "Shaft",
+  "Trinet Entertainment",
+  "Actas, SynergySP",
+  "OLM, Production Reed",
+  "Madhouse, Studio Deen",
+  "Tatsunoko Production",
+  "Studio Junio",
+  "Trinet Entertainment, Picture Magic",
+  "Satelight",
+  "Studio Hibari",
+  "Studio Flag",
+  "Tokyo Kids",
+  "Group TAC, Ginga Ya",
+  "Planet",
+  "Studio Live",
+  "Triangle Staff, Studio Wombat",
+  "Madhouse, Imagin",
+  "Studio 4°C",
+  "Studio Hibari, Production Reed",
+  "AIC Spirits, Group TAC",
+  "Gonzo, Satelight",
+  "Production I.G, Production Reed",
+  "AIC, APPP",
+  "Group TAC, Amuse",
+  "Gainax",
+  "Studio Pierrot, Studio Deen",
+  "Plum",
+  "Tezuka Productions",
+  "Studio Junio, Annapuru",
+  "APPP",
+  "Zexcs",
+  "Yumeta Company",
+  "Ishimori Entertainment",
+  "Shaft, Brain's Base, Japan Vistec",
+  "Ginga Ya",
+  "Telecom Animation Film",
+  "Genco, Radix",
+  "Phoenix Entertainment",
+  "AIC Spirits, BeSTACK",
+  "SynergySP",
+  "P.A. Works",
+  "A-1 Pictures",
+  "Remic",
+  "Studio Comet, Studio Sign",
+  "Trinet Entertainment, Studio Kyuuma",
+  "Bee Train, Cookie Jar Entertainment",
+  "Production I.G, Tatsunoko Production",
+  "Mushi Production",
+  "Telescreen",
+  "Panmedia, Meruhensha",
+  "Doga Kobo",
+  "Imagin",
+  "Diomedéa",
+  "Gonzo, AIC",
+  "White Fox",
+  "A-1 Pictures, Ordet",
+  "Nippon Animation, SynergySP, Shirogumi",
+  "The Answer Studio",
+  "Tatsunoko Production, Studio World",
+  "Gainax, feel.",
+  "AIC Spirits, Asread",
+  "Madhouse, Tatsunoko Production",
+  "Brain's Base, Marvy Jack",
+  "Bee Media, Code",
+  "David Production",
+  "AIC PLUS+",
+  "Bones, Kinema Citrus",
+  "SILVER LINK.",
+  "Hoods Entertainment",
+  "Satelight, A-1 Pictures",
+  "Hal Film Maker, TYO Animations",
+  "AIC Build",
+  "8bit",
+  "GoHands",
+  "Pierrot Plus",
+  "Studio Gokumi",
+  "Studio Pierrot, David Production",
+  "Satelight, 8bit",
+  "Barnum Studio, Project No.9, Studio Blan",
+  "Satelight, ixtl",
+  "J.C.Staff, Artland",
+  "Kinema Citrus",
+  "Satelight, Encourage Films",
+  "Gainax, Asahi Production",
+  "Madhouse, Studio Gokumi",
+  "Gonzo, DLE",
+  "Tezuka Productions, MAPPA",
+  "Actas",
+  "AIC Classic",
+  "Doga Kobo, Orange",
+  "Hoods Entertainment, Production IMS",
+  "Wit Studio",
+  "Bridge",
+  "Lerche",
+  "Project No.9",
+  "Hoods Entertainment, Felix Film",
+  "SILVER LINK., Connect",
+  "Kyoto Animation, Animation Do",
+  "Trigger",
+  "Hoods Entertainment, teamKG",
+  "SANZIGEN",
+  "Tatsunoko Production, Ordet",
+  "Production IMS",
+  "ILCA",
+  "Polygon Pictures",
+  "NAZ",
+  "Kinema Citrus, Orange",
+  "C-Station",
+  "MAPPA",
+  "A-1 Pictures, Bridge",
+  "Project No.9, Tri-Slash",
+  "Studio Ghibli, Polygon Pictures",
+  "LIDENFILMS",
+  "A-1 Pictures, TROYCA",
+  "Shuka",
+  "Studio 3Hz",
+  "Passione",
+  "TYO Animations",
+  "Seven Arcs Pictures",
+  "J.C.Staff, SANZIGEN",
+  "TMS Entertainment, Telecom Animation Fil",
+  "Shirogumi, Encourage Films",
+  "SANZIGEN, LIDENFILMS",
+  "Seven",
+  "Telecom Animation Film, Graphinica",
+  "Bandai Namco Pictures",
+  "EMT Squared",
+  "TMS Entertainment, 3xCube",
+  "Kinema Citrus, White Fox",
+  "MAPPA, Studio VOLN",
+  "TROYCA",
+  "SILVER LINK., Nexus",
+  "Nexus",
+  "Lay-duce",
+  "Orange, Studio 3Hz",
+  "Brain's Base, Platinum Vision",
+  "Hoods Drifters Studio",
+  "M.S.C",
+  "CygamesPictures",
+  "Madhouse, TMS Entertainment",
+  "Kinema Citrus, EMT Squared",
+  "Barnum Studio, Project No.9",
+  "Studio Gokumi, AXsiZ",
+  "Millepensee, GEMBA",
+  "Nut",
+  "Gathering",
+  "Haoliners Animation League",
+  "J.C.Staff, Egg Firm",
+  "WAO World",
+  "TMS Entertainment, Shin-Ei Animation",
+  "Ajia-Do",
+  "Satelight, C2C",
+  "Encourage Films",
+  "Platinum Vision",
+  "Artland, TNK",
+  "Zero-G",
+  "Gathering, Lesprit",
+  "Pine Jam",
+  "Project No.9, A-Real",
+  "Studio Pierrot, Pierrot Plus",
+  "Graphinica",
+  "Actas, Studio 3Hz",
+  "Shirogumi, EMT Squared",
+  "Children's Playground Entertainment",
+  "Kamikaze Douga",
+  "CloverWorks",
+  "Orange",
+  "Diomedéa, Studio Blanc",
+  "Emon, Blade",
+  "GEEK TOYS",
+  "A-1 Pictures, Trigger, CloverWorks",
+  "A-1 Pictures, Bridge, CloverWorks",
+  "Studio Flad",
+  "Geno Studio",
+  "AXsiZ",
+  "Asread, White Fox",
+  "MAPPA, Lapin Track",
+  "DandeLion Animation Studio",
+  "Lesprit",
+  "Acca effe, Giga Production",
+  "Asahi Production",
+  "Ascension, Creators in Pack, Zero-G",
+  "Silver, Arvo Animation",
+  "WAO World, GEMBA",
+  "J.C.Staff, A.C.G.T.",
+  "Connect",
+  "Felix Film",
+  "ENGI",
+  "P.A. Works, Studio 3Hz",
+  "Seven, GEEK TOYS",
+  "Studio Bind",
+  "Anima&Co.",
+  "HOTZIPANG",
+  "Studio A-CAT",
+  "Studio PuYUKAI",
+  "Ezόla",
+  "C2C",
+  "Maho Film",
+  "LIDENFILMS, Felix Film",
+];
+
+const rating = ["R - 17+ (violence & profanity)", "PG-13 - Teens 13 or older", "R+ - Mild Nudity", "G - All Ages", "PG - Children"]
+
+const sources = ["Original", "Manga", "4-koma manga", "Light novel", "Visual novel", "Novel", "Other", "Game", "Card game", "Book", "Web manga", "Music", "Digital manga"]
+
+
+

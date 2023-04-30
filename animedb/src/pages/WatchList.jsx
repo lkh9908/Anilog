@@ -21,6 +21,7 @@ import { Button } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import { SearchBar } from "../components/Search";
+import { Link } from "react-router-dom";
 
 
 
@@ -150,7 +151,7 @@ export const WatchList = () => {
           <TableRow>
             <StyledTableCell>ID</StyledTableCell>
             <StyledTableCell align="right">Name</StyledTableCell>
-            <StyledTableCell align="right">Japanese Name</StyledTableCell>
+            <StyledTableCell align="right">Original Name</StyledTableCell>
             <StyledTableCell align="right">Episodes</StyledTableCell>
             <StyledTableCell align="right">Rating</StyledTableCell>
             <StyledTableCell align="right">Status</StyledTableCell>
@@ -167,7 +168,7 @@ export const WatchList = () => {
                   {row.MAL_id}
                 </TableCell>
                 <TableCell style={{ width: 600 }} align="right">
-                  {row.Name}
+                <Link to={`/anime/${row.MAL_id}`}>{row.Name}</Link>
                 </TableCell>
                 <TableCell style={{ width: 600 }} align="right">
                   {row.Japanese_name}
@@ -222,9 +223,10 @@ export const WatchList = () => {
         </Table>
       </TableContainer>
       <div className="search-bar">
-            <h1>Find your anime</h1>
+            
             <SearchBar />
       </div>
+
       </div>
     );}
 

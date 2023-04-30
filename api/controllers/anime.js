@@ -19,3 +19,13 @@ export const getAnime = (req, res) => {
         return res.status(200).json(data);
     });
 }
+
+
+export const filterAnime = (req, res) => {
+    console.log('filtering')
+    const q = `SELECT * FROM Anime WHERE Genres = ? AND Score >= ? AND Score <= ? AND Rating = ? AND Studios = ? AND Source = ?`;
+    db.query(q, [req.params.genre, req.params.scoreLow, req.params.scoreHigh, req.params.rating, req.params.studio, req.params.source], (err, data) => {
+        if (err) return res.send(err);
+        return res.status(200).json(data);
+    });
+}
