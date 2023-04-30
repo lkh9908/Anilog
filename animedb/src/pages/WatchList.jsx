@@ -1,72 +1,232 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableFooter from '@mui/material/TableFooter';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import FirstPageIcon from '@mui/icons-material/FirstPage';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import LastPageIcon from '@mui/icons-material/LastPage';
+import { Button } from "@mui/material";
+import { styled } from '@mui/material/styles';
+import { tableCellClasses } from '@mui/material/TableCell';
+import { SearchBar } from "../components/Search";
 
-export const WatchList = () => {
-  const [animeList, setAnimeList] = useState([
-    {
-      id: 1,
-      name: "Attack on Titan",
-      score: 8.9,
-      episodes: 75,
-      status: "Watching",
-    },
-    {
-      id: 2,
-      name: "One Piece",
-      score: 9.0,
-      episodes: 1000,
-      status: "Plan to Watch",
-    },
-    {
-      id: 3,
-      name: "Naruto",
-      score: 8.3,
-      episodes: 720,
-      status: "Completed",
-    },
-  ]);
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleSearchInputChange = (event) => {
-    setSearchQuery(event.target.value);
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
   };
 
-  const handleAddButtonClick = () => {
-    const newAnime = {
-      id: animeList.length + 1,
-      name: "New Anime",
-      score: 0,
-      episodes: 0,
-      status: "Plan to Watch",
-    };
-    setAnimeList([...animeList, newAnime]);
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
   };
 
-  const handleDeleteButtonClick = (id) => {
-    const filteredList = animeList.filter((anime) => anime.id !== id);
-    setAnimeList(filteredList);
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
   };
 
-  const filteredAnimeList = animeList.filter((anime) =>
-    anime.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
 
   return (
-    <div>
-      <h1>Watchlist</h1>
-      <input type="text" value={searchQuery} onChange={handleSearchInputChange} placeholder="Search anime by name" />
-      <button onClick={handleAddButtonClick}>Add Anime</button>
-      <ul>
-        {filteredAnimeList.map((anime) => (
-          <li key={anime.id}>
-            <h2>{anime.name}</h2>
-            <p>Score: {anime.score}</p>
-            <p>Episodes: {anime.episodes}</p>
-            <p>Status: {anime.status}</p>
-            <button onClick={() => handleDeleteButtonClick(anime.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
   );
 }
 
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};
+
+
+let rows = []
+
+async function deleteClicked(e, MAL_ID) {
+  try {
+      console.log(await axios.delete(`/watchList/${MAL_ID}`));
+  } catch (err) {
+      console.log(err);
+  }
+}
+
+export const WatchList = () => {
+
+  const [animeList, setAnimeList] = useState([])
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("/watchList")
+        setAnimeList(res.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchData()
+  })
+
+  rows = animeList
+
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  
+    // Avoid a layout jump when reaching the last page with empty rows.
+    const emptyRows =
+      page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
+  
+    return (
+      <div>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+        <TableHead>
+          <TableRow>
+            <StyledTableCell>ID</StyledTableCell>
+            <StyledTableCell align="right">Name</StyledTableCell>
+            <StyledTableCell align="right">Japanese Name</StyledTableCell>
+            <StyledTableCell align="right">Episodes</StyledTableCell>
+            <StyledTableCell align="right">Rating</StyledTableCell>
+            <StyledTableCell align="right">Status</StyledTableCell>
+            <StyledTableCell align="right">Delete</StyledTableCell>
+          </TableRow>
+        </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : rows
+            ).map((row) => (
+              <TableRow key={row.MAL_id}>
+                <TableCell component="th" scope="row">
+                  {row.MAL_id}
+                </TableCell>
+                <TableCell style={{ width: 600 }} align="right">
+                  {row.Name}
+                </TableCell>
+                <TableCell style={{ width: 600 }} align="right">
+                  {row.Japanese_name}
+                </TableCell>
+                <TableCell style={{ width: 60 }} align="right">
+                  {row.Episode}
+                </TableCell>
+                <TableCell style={{ width: 60 }} align="right">
+                  {row.rating}
+                </TableCell>
+                <TableCell style={{ width: 100 }} align="right">
+                  {row.description}
+                </TableCell>
+                <TableCell style={{ width: 100 }} align="right">
+                <Button
+                      variant="contained"
+                      color="warning"
+                      onClick={(e) => deleteClicked(e, row.MAL_id)}
+                    >
+                      Delete
+                    </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+  
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 53 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
+                colSpan={3}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {
+                    'aria-label': 'rows per page',
+                  },
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+      <div className="search-bar">
+            <h1>Find your anime</h1>
+            <SearchBar />
+      </div>
+      </div>
+    );}
+
+
+    
