@@ -31,6 +31,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 
+
 export const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState([]);
   const [searchData, setSearchData] = useState([]);

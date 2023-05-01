@@ -13,7 +13,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/material";
-
+import TablePagination from '@mui/material/TablePagination';
 import Divider from "@mui/material/Divider";
 
 // top 10 anime saved on a different table
@@ -41,6 +41,16 @@ const StyledSmall = styled(TableCell)(({ theme }) => ({
 const StyledMedium = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: "#e49eff;",
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledLast = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#ff8c8c",
     color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -106,7 +116,7 @@ export const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/anime/recommended ");
+        const res = await axios.get("/anime/recommended");
         setRecommended(res.data);
         // console.log(res.data)
       } catch (error) {
@@ -115,6 +125,19 @@ export const Home = () => {
     };
     fetchData();
   });
+  // for recommendation, with page number
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
 
   return (
     <div className="home">
@@ -141,7 +164,7 @@ export const Home = () => {
               margin: 0,
             }}
           >
-            Top 10 anime
+            Top 10 anime By Score
           </h1>
         </Box>
 
@@ -311,29 +334,32 @@ export const Home = () => {
           </h1>
         </Box>
 
-        <TableContainer component={Paper}>
-              <Table sx={{ minWidth: 100 }} aria-label="customized table">
-                <TableHead>
-                  <TableRow>
-                    <StyledSmall>Name</StyledSmall>
-                    <StyledSmall align="left">Rating</StyledSmall>
-                    <StyledSmall align="left">Watching Users</StyledSmall>
-                    <StyledSmall align="left">High-rating Users</StyledSmall>
-                    <StyledSmall align="left">Average Rating</StyledSmall>
-                    <StyledSmall align="left">Recommendation</StyledSmall>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {Recommended.map((recommend) => (
-                    <StyledTableRow key={recommend.user_id}>
-                      <StyledTableCell component="th" scope="row">
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <TableContainer sx={{ maxHeight: 440 }}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+
+            <TableRow>
+                <StyledLast align="left">Name</StyledLast>
+                <StyledLast align="left">Original Name</StyledLast>
+                <StyledLast align="center">User Interested</StyledLast>
+                <StyledLast align="center">High Rated Users</StyledLast>
+                <StyledLast align="center">Average Rating</StyledLast>
+                <StyledLast align="center">Recommendation</StyledLast>
+              </TableRow>
+
+          </TableHead>
+          <TableBody>
+          {Recommended.map((recommend) => (
+                    <StyledTableRow key={recommend.MAL_ID}>
+                      <StyledTableCell>
                         {recommend.Name}
                       </StyledTableCell>
-                      <StyledTableCell component="th" scope="row">
-                        {recommend.rating}
+                      <StyledTableCell>
+                        {recommend.Japanese_name}
                       </StyledTableCell>
                       <StyledTableCell align="center">
-                        {recommend.watching_users}
+                        {recommend.interested_users}
                       </StyledTableCell>
                       <StyledTableCell align="center">
                         {recommend.high_rating_users}
@@ -346,9 +372,19 @@ export const Home = () => {
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 100]}
+        component="div"
+        count={Recommended.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
       </div>
     </div>
   );
