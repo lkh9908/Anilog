@@ -96,9 +96,15 @@ export const Navbar = () => {
                 )}
               </MenuItem>
               <MenuItem key="userInfo" onClick={handleCloseNavMenu}>
-                <Link to="/userInfo" className="nav-link">
-                  Profile
-                </Link>
+                {currentUser ? (
+                  <Link to="/userInfo" className="nav-link">
+                    Profile
+                  </Link>
+                ) : (
+                  <Link to="/login" className="nav-link">
+                    Profile
+                  </Link>
+                )}
               </MenuItem>
               <MenuItem key="logout" onClick={handleCloseNavMenu}>
                 {currentUser ? (
@@ -152,9 +158,15 @@ export const Navbar = () => {
               onClick={handleCloseNavMenu}
               sx={{ my: 2, color: "white", display: "block" }}
             >
-              <Link to="/userInfo" className="nav-link">
-                <h6>Profile</h6>
-              </Link>
+              {currentUser ? (
+                <Link to="/userInfo" className="nav-link">
+                  <h6>Profile</h6>
+                </Link>
+              ) : (
+                <Link to="/login" className="nav-link">
+                  <h6>Profile</h6>
+                </Link>
+              )}
             </Button>
             {currentUser ? (
               <Button
