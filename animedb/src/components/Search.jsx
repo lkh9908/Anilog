@@ -19,6 +19,18 @@ import {
 import Divider from "@mui/material/Divider";
 import { Link } from "react-router-dom";
 
+import PropTypes from "prop-types";
+import { useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+
+import TableFooter from "@mui/material/TableFooter";
+import TablePagination from "@mui/material/TablePagination";
+
+import FirstPageIcon from "@mui/icons-material/FirstPage";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import LastPageIcon from "@mui/icons-material/LastPage";
+
 export const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState([]);
   const [searchData, setSearchData] = useState([]);
@@ -27,7 +39,7 @@ export const SearchBar = () => {
     if (searchQuery == "") return;
     try {
       const res = await axios.get(`/anime/${searchQuery}`);
-      console.log(res.data);
+      // console.log(res.data);
       setSearchData(res.data);
     } catch (error) {
       console.log(error);
@@ -93,26 +105,46 @@ export const SearchBar = () => {
   const [selectedSource, setSelectedSource] = useState(sources[0]);
   const [filterResult, setFilterResult] = useState([]);
   async function handleFilter() {
-    console.log("Selected Genre:", selectedGenre);
-    console.log("Score Range:", scoreRange);
-    console.log("Rating Range:", selectedRating);
-    console.log("Studio Range:", selectedStudio);
-    console.log("Source:", selectedSource);
+    // console.log("Selected Genre:", selectedGenre);
+    // console.log("Score Range:", scoreRange);
+    // console.log("Rating Range:", selectedRating);
+    // console.log("Studio Range:", selectedStudio);
+    // console.log("Source:", selectedSource);
     // Perform filtering logic here
 
     try {
-      const res = await axios.get(`/anime/${selectedGenre}/${scoreRange[0]}/${scoreRange[1]}/${selectedRating}/${selectedStudio}/${selectedSource}`);
-      console.log(res.data);
+      const res = await axios.get(
+        `/anime/${selectedGenre}/${scoreRange[0]}/${scoreRange[1]}/${selectedRating}/${selectedStudio}/${selectedSource}`
+      );
+      // console.log(res.data);
       setFilterResult(res.data);
     } catch (error) {
       console.log(error);
     }
+  }
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  // Avoid a layout jump when reaching the last page with empty rows.
+  const emptyRowsSearch =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - searchData.length) : 0;
+
+  const emptyRowsFilter =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filterResult.length) : 0;
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <form>
-            <h1>Search anime</h1>
+      <h1>Search anime</h1>
       <div
         style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}
       >
@@ -142,8 +174,9 @@ export const SearchBar = () => {
         orientation="horizontal"
         sx={{ my: 2 }}
       />
+
       <TableContainer component={Paper}>
-        <Table aria-label="Anime table">
+        <Table sx={{ minWidth: 500 }} aria-label="anime table">
           <TableHead>
             <TableRow
               style={{
@@ -163,16 +196,23 @@ export const SearchBar = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {searchData.length > 0 ? (
-              searchData.map((anime) => (
-                <TableRow key={anime.MAL_ID}>
-                  <TableCell component="th" scope="row" align="center">
-                    <Link to={`/anime/${anime.MAL_ID}`}>{anime.Name}</Link>
-                  </TableCell>
-                  <TableCell align="center">{anime.Japanese_name}</TableCell>
-                  <TableCell align="center">
-                    <style>
-                      {`
+            {(rowsPerPage > 0
+              ? searchData.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : searchData
+            ).map((row) => (
+              <TableRow key={row.MAL_ID}>
+                <TableCell style={{ width: 600 }} align="center">
+                  <Link to={`/anime/${row.MAL_ID}`}>{row.Name}</Link>
+                </TableCell>
+                <TableCell style={{ width: 600 }} align="center">
+                  {row.Japanese_name}
+                </TableCell>
+                <TableCell align="center">
+                  <style>
+                    {`
                         .red {
                         background-color: gray;
                         pointer-events: none;
@@ -182,48 +222,67 @@ export const SearchBar = () => {
                         background-color: primary;
                         }
                     `}
-                    </style>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={(e) =>
-                        addClicked(e, anime.MAL_ID, anime.Episode)
-                      }
-                      className={cls}
-                    >
-                      Add
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan="3">No results found</TableCell>
+                  </style>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={(e) => addClicked(e, row.MAL_ID, row.Episode)}
+                    className={cls}
+                  >
+                    Add
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {emptyRowsSearch > 0 && (
+              <TableRow style={{ height: 53 * emptyRowsSearch }}>
+                <TableCell colSpan={6} />
               </TableRow>
             )}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                colSpan={3}
+                count={searchData.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: {
+                    "aria-label": "rows per page",
+                  },
+                  native: true,
+                }}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
 
       <div style={{ marginTop: "3rem", marginBottom: "1rem" }}>
-      <h1>Filter anime</h1>
-      <div style={{ marginTop: "1rem" }}>
-      <Typography gutterBottom>Genre:</Typography>
-        <Autocomplete
-          id="genre-filter"
-          options={defaultGenres}
-          value={selectedGenre}
-          onChange={(event, newValue) => {
-            setSelectedGenre(newValue);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              placeholder="Select a genre"
-            />
-          )}
-        />
+        <h1>Filter anime</h1>
+        <div style={{ marginTop: "1rem" }}>
+          <Typography gutterBottom>Genre:</Typography>
+          <Autocomplete
+            id="genre-filter"
+            options={defaultGenres}
+            value={selectedGenre}
+            onChange={(event, newValue) => {
+              setSelectedGenre(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select a genre"
+              />
+            )}
+          />
         </div>
 
         <div style={{ marginTop: "1rem" }}>
@@ -241,64 +300,61 @@ export const SearchBar = () => {
         </div>
 
         <div style={{ marginTop: "1rem" }}>
-      <Typography gutterBottom>Rating:</Typography>
-        <Autocomplete
-          id="rating-filter"
-          options={rating}
-          value={selectedRating}
-          onChange={(event, newValue) => {
-            setSelectedRating(newValue);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              placeholder="Select a rating"
-            />
-          )}
-        />
+          <Typography gutterBottom>Rating:</Typography>
+          <Autocomplete
+            id="rating-filter"
+            options={rating}
+            value={selectedRating}
+            onChange={(event, newValue) => {
+              setSelectedRating(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select a rating"
+              />
+            )}
+          />
         </div>
 
         <div style={{ marginTop: "1rem" }}>
-      <Typography gutterBottom>Studio:</Typography>
-        <Autocomplete
-          id="studio-filter"
-          options={studios}
-          value={selectedStudio}
-          onChange={(event, newValue) => {
-            setSelectedStudio(newValue);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              placeholder="Select a studio"
-            />
-          )}
-        />
+          <Typography gutterBottom>Studio:</Typography>
+          <Autocomplete
+            id="studio-filter"
+            options={studios}
+            value={selectedStudio}
+            onChange={(event, newValue) => {
+              setSelectedStudio(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select a studio"
+              />
+            )}
+          />
         </div>
 
         <div style={{ marginTop: "1rem" }}>
-      <Typography gutterBottom>Source:</Typography>
-        <Autocomplete
-          id="source-filter"
-          options={sources}
-          value={selectedSource}
-          onChange={(event, newValue) => {
-            setSelectedSource(newValue);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              placeholder="Select a source"
-            />
-          )}
-        />
+          <Typography gutterBottom>Source:</Typography>
+          <Autocomplete
+            id="source-filter"
+            options={sources}
+            value={selectedSource}
+            onChange={(event, newValue) => {
+              setSelectedSource(newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select a source"
+              />
+            )}
+          />
         </div>
-
-
-
 
         <Button
           variant="contained"
@@ -310,39 +366,47 @@ export const SearchBar = () => {
         </Button>
 
         <Divider
-        variant="fullWidth"
-        color="secondary"
-        orientation="horizontal"
-        sx={{ my: 2 }}
-      />
-      <TableContainer component={Paper}>
-        <Table aria-label="Anime table">
-          <TableHead>
-            <TableRow
-              style={{
-                backgroundColor: "#e8d7ff",
-              }}
-            >
-              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
-                Name
-              </TableCell>
-              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
-                Original Name
-              </TableCell>
+          variant="fullWidth"
+          color="secondary"
+          orientation="horizontal"
+          sx={{ my: 2 }}
+        />
 
-              <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
-                Add
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filterResult.length > 0 ? (
-              filterResult.map((anime) => (
-                <TableRow key={anime.MAL_ID}>
-                  <TableCell component="th" scope="row" align="center">
-                    <Link to={`/anime/${anime.MAL_ID}`}>{anime.Name}</Link>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 500 }} aria-label="anime table">
+            <TableHead>
+              <TableRow
+                style={{
+                  backgroundColor: "#e8d7ff",
+                }}
+              >
+                <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                  Name
+                </TableCell>
+                <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                  Original Name
+                </TableCell>
+
+                <TableCell style={{ fontWeight: "bold", textAlign: "center" }}>
+                  Add
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? filterResult.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : filterResult
+              ).map((row) => (
+                <TableRow key={row.MAL_ID}>
+                  <TableCell style={{ width: 600 }} align="center">
+                    <Link to={`/anime/${row.MAL_ID}`}>{row.Name}</Link>
                   </TableCell>
-                  <TableCell align="center">{anime.Japanese_name}</TableCell>
+                  <TableCell style={{ width: 600 }} align="center">
+                    {row.Japanese_name}
+                  </TableCell>
                   <TableCell align="center">
                     <style>
                       {`
@@ -359,28 +423,118 @@ export const SearchBar = () => {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={(e) =>
-                        addClicked(e, anime.MAL_ID, anime.Episode)
-                      }
+                      onClick={(e) => addClicked(e, row.MAL_ID, row.Episode)}
                       className={cls}
                     >
                       Add
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
+              ))}
+
+              {emptyRowsFilter > 0 && (
+                <TableRow style={{ height: 53 * emptyRowsFilter }}>
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )}
+            </TableBody>
+            <TableFooter>
               <TableRow>
-                <TableCell colSpan="3">No results found</TableCell>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={3}
+                  count={filterResult.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: {
+                      "aria-label": "rows per page",
+                    },
+                    native: true,
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableFooter>
+          </Table>
+        </TableContainer>
       </div>
     </form>
   );
 };
+
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const { count, page, rowsPerPage, onPageChange } = props;
+
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowRight />
+        ) : (
+          <KeyboardArrowLeft />
+        )}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === "rtl" ? (
+          <KeyboardArrowLeft />
+        ) : (
+          <KeyboardArrowRight />
+        )}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
+  );
+}
+
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};
+
+// default values
 
 const marks = [
   {
@@ -394,6 +548,7 @@ const marks = [
 ];
 
 const defaultGenres = [
+  "ALL",
   "Action",
   "Comedy",
   "Drama",
@@ -428,6 +583,7 @@ const defaultGenres = [
 ];
 
 const studios = [
+  "ALL",
   "Sunrise",
   "Madhouse",
   "J.C.Staff",
@@ -691,9 +847,28 @@ const studios = [
   "LIDENFILMS, Felix Film",
 ];
 
-const rating = ["R - 17+ (violence & profanity)", "PG-13 - Teens 13 or older", "R+ - Mild Nudity", "G - All Ages", "PG - Children"]
+const rating = [
+  "ALL",
+  "R - 17+ (violence & profanity)",
+  "PG-13 - Teens 13 or older",
+  "R+ - Mild Nudity",
+  "G - All Ages",
+  "PG - Children",
+];
 
-const sources = ["Original", "Manga", "4-koma manga", "Light novel", "Visual novel", "Novel", "Other", "Game", "Card game", "Book", "Web manga", "Music", "Digital manga"]
-
-
-
+const sources = [
+  "ALL",
+  "Original",
+  "Manga",
+  "4-koma manga",
+  "Light novel",
+  "Visual novel",
+  "Novel",
+  "Other",
+  "Game",
+  "Card game",
+  "Book",
+  "Web manga",
+  "Music",
+  "Digital manga",
+];
