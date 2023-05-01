@@ -16,6 +16,10 @@ import { Box } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
 import Divider from "@mui/material/Divider";
 
+import Logo from "../img/cat_logo.png";
+import img1 from "../img/img1.png";
+import img2 from "../img/img2.png";
+
 // top 10 anime saved on a different table
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -141,6 +145,11 @@ export const Home = () => {
 
   return (
     <div className="home">
+
+      <div style={{ textAlign: 'center' }}>
+        <img src={Logo} alt="My Image" className="home-image"></img>
+      </div>
+
       <div className="top-anime">
         <Divider
           variant="fullWidth"
@@ -200,6 +209,10 @@ export const Home = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        <div style={{ textAlign: 'center' }}>
+          <img src={img1} alt="My Image" className="home-image"></img>
+        </div>
 
         <Divider
           variant="fullWidth"
@@ -306,7 +319,10 @@ export const Home = () => {
             </TableContainer>
           </Grid>
         </Grid>
-
+        
+        <div style={{ textAlign: 'center' }}>
+          <img src={img2} alt="My Image" className="home-image"></img>
+        </div>
         <Divider
           variant="fullWidth"
           color="secondary"

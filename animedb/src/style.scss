@@ -113,7 +113,7 @@ $theme : #87adfa, #C7E9FF, #e49eff;
     // home page
     .home {
         .top-anime{
-            margin-top: 50px;
+            // margin-top: 50px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -161,4 +161,13 @@ $theme : #87adfa, #C7E9FF, #e49eff;
     width: 10rem;
 }
 
+.home-image {
+    display: block;
+    margin-top: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+    max-width: 20%;
+    height: auto;
+}
 

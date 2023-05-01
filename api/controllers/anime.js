@@ -26,7 +26,7 @@ export const getRecommended = (req, res) => {
     JOIN OLDAnimelist al ON r.user_id = al.user_id AND al.MAL_ID = a.MAL_ID
     GROUP BY a.MAL_ID
     HAVING COUNT(DISTINCT al.user_id) >= 10 AND MAX(r.rating) >= 7
-    ORDER BY average_rating DESC, high_rating_users DESC, interested_users DESC LIMIT 10`
+    ORDER BY average_rating DESC, high_rating_users DESC, interested_users DESC LIMIT 100`
     
     
             db.query(q, (err, data) => {
