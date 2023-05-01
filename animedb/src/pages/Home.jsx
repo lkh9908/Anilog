@@ -13,7 +13,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/material";
-import TablePagination from '@mui/material/TablePagination';
+import TablePagination from "@mui/material/TablePagination";
 import Divider from "@mui/material/Divider";
 
 // top 10 anime saved on a different table
@@ -72,7 +72,7 @@ export const Home = () => {
   const [top10, settop10] = useState([]);
   const [topUsers, setTopUsers] = useState([]);
   const [topStudios, setTopStudios] = useState([]);
-  const [Recommended , setRecommended ] = useState([]);
+  const [Recommended, setRecommended] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -173,7 +173,7 @@ export const Home = () => {
             <TableHead>
               <TableRow>
                 <StyledTableCell>Name</StyledTableCell>
-                <StyledTableCell align="center">Japanese Name</StyledTableCell>
+                <StyledTableCell align="center">Original Name</StyledTableCell>
                 <StyledTableCell align="center">Genre</StyledTableCell>
                 <StyledTableCell align="center">Type</StyledTableCell>
                 <StyledTableCell align="center">Stuidio</StyledTableCell>
@@ -334,57 +334,53 @@ export const Home = () => {
           </h1>
         </Box>
 
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-
-            <TableRow>
-                <StyledLast align="left">Name</StyledLast>
-                <StyledLast align="left">Original Name</StyledLast>
-                <StyledLast align="center">User Interested</StyledLast>
-                <StyledLast align="center">High Rated Users</StyledLast>
-                <StyledLast align="center">Average Rating</StyledLast>
-                <StyledLast align="center">Recommendation</StyledLast>
-              </TableRow>
-
-          </TableHead>
-          <TableBody>
-          {Recommended.map((recommend) => (
-                    <StyledTableRow key={recommend.MAL_ID}>
-                      <StyledTableCell>
-                        {recommend.Name}
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        {recommend.Japanese_name}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {recommend.interested_users}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {recommend.high_rating_users}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {recommend.average_rating}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {recommend.recommendation}
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={Recommended.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </Paper>
+        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  <StyledLast align="left">Name</StyledLast>
+                  <StyledLast align="left">Original Name</StyledLast>
+                  <StyledLast align="center">User Interested</StyledLast>
+                  <StyledLast align="center">High Rated Users</StyledLast>
+                  <StyledLast align="center">Average Rating</StyledLast>
+                  <StyledLast align="center">Recommendation</StyledLast>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Recommended.map((recommend) => (
+                  <StyledTableRow key={recommend.MAL_ID}>
+                    <StyledTableCell>
+                      <Link to={`/anime/${recommend.MAL_ID}`}>{recommend.Name}</Link>
+                    </StyledTableCell>
+                    <StyledTableCell>{recommend.Japanese_name}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      {recommend.interested_users}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {recommend.high_rating_users}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {recommend.average_rating}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {recommend.recommendation}
+                    </StyledTableCell>
+                  </StyledTableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={Recommended.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
       </div>
     </div>
   );
