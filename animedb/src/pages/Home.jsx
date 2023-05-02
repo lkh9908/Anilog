@@ -296,8 +296,8 @@ export const Home = () => {
                 <TableHead>
                   <TableRow>
                     <StyledSmall>User ID</StyledSmall>
-                    <StyledSmall align="left">Total Episodes</StyledSmall>
                     <StyledSmall align="left">Total Anime</StyledSmall>
+                    <StyledSmall align="left">Total Episodes</StyledSmall>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -307,10 +307,10 @@ export const Home = () => {
                         {topuser.user_id}
                       </StyledTableCell>
                       <StyledTableCell component="th" scope="row">
-                        {topuser.total_watched_episodes}
+                        {topuser.total_watched_anime}
                       </StyledTableCell>
                       <StyledTableCell align="center">
-                        {topuser.total_watched_anime}
+                        {topuser.total_watched_episodes}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -387,7 +387,7 @@ export const Home = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
+          {/* <TablePagination
             rowsPerPageOptions={[10, 25, 100]}
             component="div"
             count={Recommended.length}
@@ -395,7 +395,7 @@ export const Home = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          /> */}
         </Paper>
       </div>
     </div>
