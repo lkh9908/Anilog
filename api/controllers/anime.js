@@ -10,21 +10,31 @@ export const getTop10 = (req, res) => {
 };
 
 export const getRecommended = (req, res) => {
-  const q = `SELECT a.Name, a.MAL_ID, a.Japanese_name,
-        COUNT(CASE WHEN al.watching_status = 1 OR al.watching_status = 2 OR al.watching_status = 6 THEN 1 ELSE NULL END) AS interested_users,
-        COUNT(CASE WHEN al.rating >= 8 THEN 1 ELSE NULL END) AS high_rating_users,
-        AVG(al.rating) AS average_rating,
-        CASE
-          WHEN a.Score >= 8 THEN 'Highly Recommended'
-          WHEN a.Score >= 7 THEN 'Recommended'
-          ELSE 'Not Recommended'
-        END AS recommendation
-    FROM Anime a
-    JOIN Rating r ON a.MAL_ID = r.MAL_ID
-    JOIN OLDAnimelist al ON r.user_id = al.user_id AND al.MAL_ID = a.MAL_ID
-    GROUP BY a.MAL_ID
-    HAVING COUNT(DISTINCT al.user_id) >= 10 AND MAX(r.rating) >= 7
-    ORDER BY average_rating DESC, high_rating_users DESC, interested_users DESC LIMIT 100`;
+  //   const q = `SELECT a.Name, a.MAL_ID, a.Japanese_name,
+  //         COUNT(CASE WHEN al.watching_status = 1 OR al.watching_status = 2 OR al.watching_status = 6 THEN 1 ELSE NULL END) AS interested_users,
+  //         COUNT(CASE WHEN al.rating >= 8 THEN 1 ELSE NULL END) AS high_rating_users,
+  //         AVG(al.rating) AS average_rating,
+  //         CASE
+  //           WHEN a.Score >= 8 THEN 'Highly Recommended'
+  //           WHEN a.Score >= 7 THEN 'Recommended'
+  //           ELSE 'Not Recommended'
+  //         END AS recommendation
+  //     FROM Anime a
+  //     JOIN Rating r ON a.MAL_ID = r.MAL_ID
+  //     JOIN OLDAnimelist al ON r.user_id = al.user_id AND al.MAL_ID = a.MAL_ID
+  //     GROUP BY a.MAL_ID
+  //     HAVING COUNT(DISTINCT al.user_id) >= 10 AND MAX(r.rating) >= 7
+  //     ORDER BY average_rating DESC, high_rating_users DESC, interested_users DESC LIMIT 100`;
+
+  const q = `SELECT a.Name, a.MAL_ID, a.Japanese_name, al.interested_users, al.high_rating_users, al.average_rating,
+CASE
+  WHEN a.Score >= 8 THEN 'Highly Recommended'
+  WHEN a.Score >= 7 THEN 'Recommended'
+  ELSE 'Not Recommended'
+END AS recommendation
+FROM Anime a
+JOIN AlistWatchingRatingStats al ON a.MAL_ID = al.MAL_ID
+ORDER BY al.average_rating DESC, al.high_rating_users DESC, al.interested_users DESC LIMIT 100`;
 
   db.query(q, (err, data) => {
     if (err) return res.send(err);

@@ -20,3 +20,4 @@
 5. Specific queries for each route are defined in `js` files under the controller folder.
 
 Note: the API URLs in the React app currently point to local server instead of the deployed server```
+Github: https://github.com/lkh9908/CIS550Project 
