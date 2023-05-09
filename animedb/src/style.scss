@@ -4,8 +4,9 @@ $theme : #87adfa, #C7E9FF, #e49eff;
     display: flex;
     justify-content: center;
     background-image: linear-gradient(79deg, $theme);
+    width: 100%;
     .container {
-    width: 1024px;
+    width: 80%;
 
         .links{
             text-decoration: none;

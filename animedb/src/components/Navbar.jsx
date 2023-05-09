@@ -34,7 +34,10 @@ export const Navbar = () => {
   };
 
   return (
-    <AppBar position="static" style={{ background: "#9b5de5" }}>
+    <AppBar
+      position="static"
+      style={{ background: "#9b5de5", marginBottom: "50px" }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
